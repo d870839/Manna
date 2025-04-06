@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Counter Goal App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: row;
+        }
+        .sidebar {
+            width: 250px;
+            padding: 20px;
+            box-sizing: border-box;
+            background-color: #f9f9f9;
+            overflow-y: auto;
+        }
+        .main {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        button {
+            padding: 5px 10px;
+            margin: 5px 0;
+            font-size: 14px;
+            display: block;
+            width: 100%;
+        }
+        .label {
+            font-size: 14px;
+            margin: 5px 0;
+        }
+        #goal-message {
+            color: green;
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .thermometer {
+            width: 80px;
+            height: 100vh;
+            border: 2px solid #333;
+            border-radius: 0 0 30px 30px;
+            position: relative;
+            background-color: #eee;
+        }
+        .fill {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            background-color: red;
+            border-radius: 0 0 30px 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>Manna Goal Counter!</h2>
+        <div class="label">Goal: $<span id="goal">100000</span></div>
+        <div class="label">Current Amount: <span id="counter">0</span></div>
+
+        <div class="label">New Board Members: <span id="count1">0</span> times</div>
+        <button onclick="updateCounter(4000)" id="btn1">New Board Member</button>
+
+        <div class="label">$200/Month Donors: <span id="count2">0</span> times</div>
+        <button onclick="updateCounter(2400)" id="btn2">$200/Month Donor</button>
+
+        <div class="label">$100/Month Donors: <span id="count3">0</span> times</div>
+        <button onclick="updateCounter(1200)" id="btn3">$100/Month Donor</button>
+
+        <div class="label">$50/Month Donors: <span id="count4">0</span> times</div>
+        <button onclick="updateCounter(600)" id="btn4">$50/Month Donor</button>
+
+        <div class="label">$5k Donors:<span id="count5">0</span> times</div>
+        <button onclick="updateCounter(5000)" id="btn5">$5k Donor</button>
+
+        <div class="label">$1k Donors:<span id="count6">0</span> times</div>
+        <button onclick="updateCounter(1000)" id="btn6">$1k Donor</button>
+
+        <div class="label">$500 Donors:<span id="count7">0</span> times</div>
+        <button onclick="updateCounter(500)" id="btn7">$500 Donor</button>
+
+        <div class="label">$250 Donors:<span id="count8">0</span> times</div>
+        <button onclick="updateCounter(250)" id="btn8">$250 Donor</button>
+
+        <p id="goal-message"></p>
+    </div>
+    <div class="main">
+        <div class="thermometer">
+            <div class="fill" id="fill" style="height: 0%"></div>
+        </div>
+    </div>
+
+    <script>
+        let counter = 0;
+        const goal = parseInt(document.getElementById('goal').textContent);
+        let count1 = 0, count2 = 0, count3 = 0, count4 = 0, count5 = 0, count6 = 0, count7 = 0, count8 = 0;
+
+        function updateCounter(amount) {
+            if (counter >= goal) return;
+
+            fetch(`/update?amount=${amount}`)
+                .then(response => response.json())
+                .then(data => {
+                    counter = data.counter;
+                    document.getElementById('counter').textContent = '$' + counter;
+                    const fillPercent = Math.min((counter / goal) * 100, 100);
+                    document.getElementById('fill').style.height = fillPercent + '%';
+
+                    switch (amount) {
+                        case 4000: count1++; document.getElementById('count1').textContent = count1; break;
+                        case 2400: count2++; document.getElementById('count2').textContent = count2; break;
+                        case 1200: count3++; document.getElementById('count3').textContent = count3; break;
+                        case 600:  count4++; document.getElementById('count4').textContent = count4; break;
+                        case 5000: count5++; document.getElementById('count5').textContent = count5; break;
+                        case 1000: count6++; document.getElementById('count6').textContent = count6; break;
+                        case 500:  count7++; document.getElementById('count7').textContent = count7; break;
+                        case 250:  count8++; document.getElementById('count8').textContent = count8; break;
+                    }
+
+                    if (data.goal_reached) {
+                        document.getElementById('goal-message').textContent = "🎉 Goal Reached! 🎉";
+                        for (let i = 1; i <= 8; i++) {
+                            document.getElementById(`btn${i}`).disabled = true;
+                        }
+                    }
+                });
+        }
+    </script>
+</body>
+</html>
