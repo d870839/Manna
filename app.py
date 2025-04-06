@@ -57,6 +57,20 @@ def update():
             "counter": counter,
             "goal_reached": counter >= goal
         })
+@app.route('/reset')
+def reset():
+    password = request.args.get('password')
+    if password != "your-secret-password":
+        return jsonify({"success": False})
+
+    with sqlite3.connect("counter.db") as conn:
+        c = conn.cursor()
+        c.execute("""
+            UPDATE stats SET counter = 0, count1 = 0, count2 = 0, count3 = 0,
+            count4 = 0, count5 = 0, count6 = 0, count7 = 0, count8 = 0 WHERE id = 1
+        """)
+        conn.commit()
+    return jsonify({"success": True})
 
 if __name__ == "__main__":
     init_db()
