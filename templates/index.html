@@ -156,6 +156,28 @@
             }
         });
 }
+window.onload = () => {
+    fetch('/data')
+        .then(response => response.json())
+        .then(data => {
+            counter = data.counter;
+            document.getElementById('counter').textContent = '$' + counter;
+            const fillPercent = Math.min((counter / goal) * 100, 100);
+            document.getElementById('fill').style.height = fillPercent + '%';
+
+            const counts = data.counts;
+            for (let i = 1; i <= 8; i++) {
+                document.getElementById(`count${i}`).textContent = counts[i - 1];
+                if (counter >= goal) {
+                    document.getElementById(`btn${i}`).disabled = true;
+                }
+            }
+
+            if (counter >= goal) {
+                document.getElementById('goal-message').textContent = "🎉 Goal Reached! 🎉";
+            }
+        });
+}
 
     </script>
 </body>
