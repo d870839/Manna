@@ -60,7 +60,7 @@ def update():
 @app.route('/reset')
 def reset():
     password = request.args.get('password')
-    if password != "your-secret-password":
+    if password != "Lori2025":
         return jsonify({"success": False})
 
     with sqlite3.connect("counter.db") as conn:
