@@ -140,6 +140,23 @@
                     }
                 });
         }
+        function resetCounts() {
+    const password = document.getElementById('reset-password').value;
+    fetch(`/reset?password=${encodeURIComponent(password)}`)
+        .then(response => response.json())
+        .then(data => {
+            const msg = document.getElementById('reset-status');
+            if (data.success) {
+                msg.style.color = 'green';
+                msg.textContent = '✅ Reset successful! Reloading...';
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                msg.style.color = 'red';
+                msg.textContent = '❌ Incorrect password.';
+            }
+        });
+}
+
     </script>
 </body>
 </html>
