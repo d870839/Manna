@@ -93,116 +93,112 @@
         <button onclick="updateCounter(250)" id="btn8">$250 Donor</button>
 
         <p id="goal-message"></p>
+
+        <div class="label">Reset Database (Password Protected)</div>
+        <form id="reset-form">
+            <input type="password" id="reset-password" placeholder="Enter password" required />
+            <button type="submit">Reset</button>
+        </form>
+        <p id="reset-message"></p>
     </div>
-    <div class="label">Reset Database (Password Protected)</div>
-<form id="reset-form">
-    <input type="password" id="reset-password" placeholder="Enter password" required />
-    <button type="submit">Reset</button>
-</form>
-<p id="reset-message"></p>
+
     <div class="main">
         <div class="thermometer">
             <div class="fill" id="fill" style="height: 0%"></div>
         </div>
     </div>
 
-     <script>
-       let counter = 0;
-let count1 = 0, count2 = 0, count3 = 0, count4 = 0, count5 = 0, count6 = 0, count7 = 0, count8 = 0;
+    <script>
+        let counter = 0;
 
-function fetchData() {
-    fetch('/data')  // Fetch the data from the /data route
-        .then(response => response.json())
-        .then(data => {
-            // Set the counter and goal values from the fetched data
-            counter = data.counter;
-            document.getElementById('counter').textContent = '$' + counter;
+        function fetchData() {
+            fetch('/data')
+                .then(response => response.json())
+                .then(data => {
+                    counter = data.counter;
+                    const goalValue = data.goal;
 
-            const goalValue = data.goal;
-            document.getElementById('goal').textContent = goalValue;
+                    document.getElementById('counter').textContent = '$' + counter.toLocaleString();
+                    document.getElementById('goal').textContent = goalValue.toLocaleString();
 
-            // Set the fill percentage for the thermometer
-            const fillPercent = Math.min((counter / goalValue) * 100, 100);
-            document.getElementById('fill').style.height = fillPercent + '%';
+                    const fillPercent = Math.min((counter / goalValue) * 100, 100);
+                    document.getElementById('fill').style.height = fillPercent + '%';
 
-            // Update the counts for each button
-            const counts = data.counts;
-            [count1, count2, count3, count4, count5, count6, count7, count8] = counts;
-            for (let i = 0; i < counts.length; i++) {
-                document.getElementById(`count${i + 1}`).textContent = counts[i];
-            }
+                    const counts = data.counts;
+                    for (let i = 0; i < counts.length; i++) {
+                        document.getElementById(`count${i + 1}`).textContent = counts[i];
+                    }
 
-            // Disable buttons if the goal is reached
-            if (counter >= goalValue) {
-                document.getElementById('goal-message').textContent = "🎉 Goal Reached! 🎉";
-                for (let i = 1; i <= 8; i++) {
-                    document.getElementById(`btn${i}`).disabled = true;
+                    if (counter >= goalValue) {
+                        document.getElementById('goal-message').textContent = "🎉 Goal Reached! 🎉";
+                        for (let i = 1; i <= 8; i++) {
+                            document.getElementById(`btn${i}`).disabled = true;
+                        }
+                    }
+                });
+        }
+
+        function updateCounter(amount) {
+            const goal = parseInt(document.getElementById('goal').textContent.replace(/,/g, ''));
+            if (counter >= goal) return;
+
+            fetch(`/update?amount=${amount}`)
+                .then(response => response.json())
+                .then(data => {
+                    counter = data.counter;
+                    document.getElementById('counter').textContent = '$' + counter.toLocaleString();
+                    const fillPercent = Math.min((counter / goal) * 100, 100);
+                    document.getElementById('fill').style.height = fillPercent + '%';
+
+                    const counts = data.counts;
+                    for (let i = 0; i < counts.length; i++) {
+                        document.getElementById(`count${i + 1}`).textContent = counts[i];
+                    }
+
+                    if (data.goal_reached) {
+                        document.getElementById('goal-message').textContent = "🎉 Goal Reached! 🎉";
+                        for (let i = 1; i <= 8; i++) {
+                            document.getElementById(`btn${i}`).disabled = true;
+                        }
+                    }
+                });
+        }
+
+        document.getElementById("reset-form").addEventListener("submit", function (event) {
+            event.preventDefault();
+            const password = document.getElementById("reset-password").value;
+
+            fetch('/reset', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `password=${encodeURIComponent(password)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                const message = document.getElementById("reset-message");
+                if (data.success) {
+                    message.textContent = "Database has been reset!";
+                    message.style.color = "green";
+                    fetchData(); // Refresh data after reset
+                } else {
+                    message.textContent = `Error: ${data.message}`;
+                    message.style.color = "red";
                 }
-            }
-        });
-}
-
-function updateCounter(amount) {
-    const goal = parseInt(document.getElementById('goal').textContent);
-    if (counter >= goal) return;
-
-    fetch(`/update?amount=${amount}`)
-        .then(response => response.json())
-        .then(data => {
-            counter = data.counter;
-            document.getElementById('counter').textContent = '$' + counter;
-            const fillPercent = Math.min((counter / goal) * 100, 100);
-            document.getElementById('fill').style.height = fillPercent + '%';
-
-            const counts = data.counts;
-            [count1, count2, count3, count4, count5, count6, count7, count8] = counts;
-            for (let i = 0; i < counts.length; i++) {
-                document.getElementById(`count${i + 1}`).textContent = counts[i];
-            }
-
-            if (data.goal_reached) {
-                document.getElementById('goal-message').textContent = "🎉 Goal Reached! 🎉";
-                for (let i = 1; i <= 8; i++) {
-                    document.getElementById(`btn${i}`).disabled = true;
-                }
-            }
-        });
-}
-
-window.onload = () => {
-    fetchData();  // Call fetchData to get the initial values when the page loads
-    setInterval(fetchData, 10000);  // Auto-refresh every 10 seconds
-};
-         document.getElementById("reset-form").addEventListener("submit", function (event) {
-        event.preventDefault(); // Prevent the form from submitting normally
-
-        const password = document.getElementById("reset-password").value;
-
-        fetch('/reset', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: `password=${password}`
-        })
-        .then(response => response.json())
-        .then(data => {
-            const message = document.getElementById("reset-message");
-            if (data.success) {
-                message.textContent = "Database has been reset!";
-                message.style.color = "green";
-            } else {
-                message.textContent = `Error: ${data.message}`;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                const message = document.getElementById("reset-message");
+                message.textContent = "There was an error with the reset.";
                 message.style.color = "red";
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            const message = document.getElementById("reset-message");
-            message.textContent = "There was an error with the reset.";
-            message.style.color = "red";
+            });
         });
-    });
+
+        window.onload = () => {
+            fetchData();
+            setInterval(fetchData, 10000); // Refresh every 10 seconds
+        };
     </script>
 </body>
 </html>
