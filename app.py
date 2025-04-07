@@ -34,7 +34,7 @@ def index():
 def update():
     amount = int(request.args.get('amount', 0))
 
-    conn = sqlite3.connect('database.db')
+    conn = sqlite3.connect('counter.db')
     cursor = conn.cursor()
 
     # Get current total and goal
@@ -79,7 +79,7 @@ def update():
 def get_counts(cursor=None):
     close_conn = False
     if cursor is None:
-        conn = sqlite3.connect('database.db')
+        conn = sqlite3.connect('counter.db')
         cursor = conn.cursor()
         close_conn = True
 
