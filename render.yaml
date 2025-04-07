@@ -4,7 +4,7 @@ services:
     env: python
     plan: free
     buildCommand: "pip install -r requirements.txt"
-    startCommand: "python initdb.py && python app.py"
+    startCommand: "python init_db.py && python app.py"
     envVars:
       - key: DATABASE_URL
         value: sqlite:///database.db
