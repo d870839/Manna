@@ -30,7 +30,17 @@ def init_db():
                 INSERT INTO {TABLE_NAME} VALUES (1, 0, 100000, 0, 0, 0, 0, 0, 0, 0, 0)
             ''')
         conn.commit()
-
+@app.route('/data')
+def data():
+    with sqlite3.connect({TABLE_NAME}) as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT counter, goal, count1, count2, count3, count4, count5, count6, count7, count8 FROM {TABLE_NAME} WHERE id = 1")
+        row = cursor.fetchone()
+        return jsonify({
+            "counter": row[0],
+            "goal": row[1],
+            "counts": list(row[2:])
+        })
 @app.route('/')
 def index():
     return render_template('index.html')  # Make sure templates/index.html exists
