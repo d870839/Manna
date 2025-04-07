@@ -1,7 +1,7 @@
 import sqlite3
 import os
 
-db_path = 'database.db'
+db_path = db_path = '/opt/render/project/src/database.db'
 log_path = 'init_db_log.txt'
 
 # Open log file
