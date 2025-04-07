@@ -32,9 +32,12 @@ def init_db():
         conn.commit()
 @app.route('/data')
 def data():
-    with sqlite3.connect({TABLE_NAME}) as conn:
+    with sqlite3.connect("counter.db") as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT counter, goal, count1, count2, count3, count4, count5, count6, count7, count8 FROM {TABLE_NAME} WHERE id = 1")
+        cursor.execute("""
+            SELECT counter, goal, count1, count2, count3, count4, count5, count6, count7, count8
+            FROM stats WHERE id = 1
+        """)
         row = cursor.fetchone()
         return jsonify({
             "counter": row[0],
