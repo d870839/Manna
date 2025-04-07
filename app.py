@@ -7,7 +7,7 @@ def init_db():
     with sqlite3.connect("counter.db") as conn:
         c = conn.cursor()
         c.execute('''
-            CREATE TABLE IF NOT EXISTS stats (
+            CREATE TABLE IF NOT EXISTS counter (
                 id INTEGER PRIMARY KEY,
                 counter INTEGER,
                 goal INTEGER,
@@ -21,7 +21,7 @@ def init_db():
                 count8 INTEGER
             )
         ''')
-        c.execute('SELECT COUNT(*) FROM stats')
+        c.execute('SELECT COUNT(*) FROM counter')
         if c.fetchone()[0] == 0:
             c.execute('INSERT INTO stats VALUES (1, 0, 100000, 0, 0, 0, 0, 0, 0, 0, 0)')
         conn.commit()
@@ -99,7 +99,7 @@ def reset():
     with sqlite3.connect("counter.db") as conn:
         c = conn.cursor()
         c.execute("""
-            UPDATE stats SET counter = 0, count1 = 0, count2 = 0, count3 = 0,
+            UPDATE counter SET counter = 0, count1 = 0, count2 = 0, count3 = 0,
             count4 = 0, count5 = 0, count6 = 0, count7 = 0, count8 = 0 WHERE id = 1
         """)
         conn.commit()
