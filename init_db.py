@@ -1,7 +1,7 @@
 import sqlite3
 import os
 
-db_path = '/opt/render/project/name/database.db'  # Use persistent path
+db_path = '/opt/render/project/name/counter.db'  # Use persistent path
 log_path = '/opt/render/project/name/init_db_log.txt'  # Log path for debugging
 
 # Create/open the log file
