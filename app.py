@@ -32,31 +32,64 @@ def index():
 
 @app.route('/update')
 def update():
-    amount = int(request.args.get('amount'))
-    with sqlite3.connect("counter.db") as conn:
-        c = conn.cursor()
-        c.execute("SELECT * FROM stats WHERE id = 1")
-        row = c.fetchone()
-        counter, goal = row[1], row[2]
-        if counter >= goal:
-            return jsonify({"counter": counter, "goal_reached": True})
+    amount = int(request.args.get('amount', 0))
 
-        counter += amount
-        counts = list(row[3:])
-        amount_map = {4000: 0, 2400: 1, 1200: 2, 600: 3, 5000: 4, 1000: 5, 500: 6, 250: 7}
-        index = amount_map[amount]
-        counts[index] += 1
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
 
-        c.execute("""
-            UPDATE stats SET counter=?, count1=?, count2=?, count3=?, count4=?,
-            count5=?, count6=?, count7=?, count8=? WHERE id = 1
-        """, (counter, *counts))
-        conn.commit()
+    # Get current total and goal
+    cursor.execute("SELECT total, goal FROM counter")
+    total, goal = cursor.fetchone()
 
-        return jsonify({
-            "counter": counter,
-            "goal_reached": counter >= goal
-        })
+    if total >= goal:
+        conn.close()
+        return jsonify({"counter": total, "counts": get_counts(), "goal_reached": True})
+
+    # Update total
+    new_total = total + amount
+    cursor.execute("UPDATE counter SET total = ? WHERE rowid = 1", (new_total,))
+
+    # Update the right count based on the amount
+    index_map = {
+        4000: 'count1',
+        2400: 'count2',
+        1200: 'count3',
+        600:  'count4',
+        5000: 'count5',
+        1000: 'count6',
+        500:  'count7',
+        250:  'count8'
+    }
+
+    if amount in index_map:
+        cursor.execute(f"UPDATE counter SET {index_map[amount]} = {index_map[amount]} + 1 WHERE rowid = 1")
+
+    conn.commit()
+
+    # Return updated data
+    cursor.execute("SELECT total FROM counter")
+    new_total = cursor.fetchone()[0]
+    counts = get_counts(cursor)
+    conn.close()
+
+    return jsonify({"counter": new_total, "counts": counts, "goal_reached": new_total >= goal})
+
+
+# Utility to return counts as a list
+def get_counts(cursor=None):
+    close_conn = False
+    if cursor is None:
+        conn = sqlite3.connect('database.db')
+        cursor = conn.cursor()
+        close_conn = True
+
+    cursor.execute("SELECT count1, count2, count3, count4, count5, count6, count7, count8 FROM counter")
+    counts = list(cursor.fetchone())
+
+    if close_conn:
+        conn.close()
+
+    return counts
 @app.route('/reset')
 def reset():
     password = request.args.get('password')
