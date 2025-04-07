@@ -3,13 +3,16 @@ import sqlite3
 
 app = Flask(__name__)
 
+DB_NAME = "counter.db"
+TABLE_NAME = "stats"
+
 def init_db():
-    with sqlite3.connect("databse.db") as conn:
+    with sqlite3.connect(DB_NAME) as conn:
         c = conn.cursor()
-        c.execute('''
-            CREATE TABLE IF NOT EXISTS counter (
+        c.execute(f'''
+            CREATE TABLE IF NOT EXISTS {TABLE_NAME} (
                 id INTEGER PRIMARY KEY,
-                total INTEGER,
+                counter INTEGER,
                 goal INTEGER,
                 count1 INTEGER,
                 count2 INTEGER,
@@ -21,33 +24,35 @@ def init_db():
                 count8 INTEGER
             )
         ''')
-        c.execute('SELECT COUNT(*) FROM counter')
+        c.execute(f'SELECT COUNT(*) FROM {TABLE_NAME}')
         if c.fetchone()[0] == 0:
-            c.execute('INSERT INTO counter VALUES (1, 0, 100000, 0, 0, 0, 0, 0, 0, 0, 0)')
+            c.execute(f'''
+                INSERT INTO {TABLE_NAME} VALUES (1, 0, 100000, 0, 0, 0, 0, 0, 0, 0, 0)
+            ''')
         conn.commit()
 
 @app.route('/')
 def index():
-    return render_template('index.html')  # your current HTML goes in templates/index.html
+    return render_template('index.html')  # Make sure templates/index.html exists
 
 @app.route('/update')
 def update():
     amount = int(request.args.get('amount', 0))
 
-    conn = sqlite3.connect('database')
+    conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
 
-    # Get current total and goal
-    cursor.execute("SELECT total, goal FROM counter")
+    # Get current counter and goal
+    cursor.execute(f"SELECT counter, goal FROM {TABLE_NAME} WHERE id = 1")
     total, goal = cursor.fetchone()
 
     if total >= goal:
         conn.close()
         return jsonify({"counter": total, "counts": get_counts(), "goal_reached": True})
 
-    # Update total
+    # Update counter
     new_total = total + amount
-    cursor.execute("UPDATE counter SET total = ? WHERE rowid = 1", (new_total,))
+    cursor.execute(f"UPDATE {TABLE_NAME} SET counter = ? WHERE id = 1", (new_total,))
 
     # Update the right count based on the amount
     index_map = {
@@ -62,28 +67,30 @@ def update():
     }
 
     if amount in index_map:
-        cursor.execute(f"UPDATE counter SET {index_map[amount]} = {index_map[amount]} + 1 WHERE rowid = 1")
+        cursor.execute(f"UPDATE {TABLE_NAME} SET {index_map[amount]} = {index_map[amount]} + 1 WHERE id = 1")
 
     conn.commit()
 
     # Return updated data
-    cursor.execute("SELECT total FROM counter")
+    cursor.execute(f"SELECT counter FROM {TABLE_NAME} WHERE id = 1")
     new_total = cursor.fetchone()[0]
     counts = get_counts(cursor)
     conn.close()
 
     return jsonify({"counter": new_total, "counts": counts, "goal_reached": new_total >= goal})
 
-
 # Utility to return counts as a list
 def get_counts(cursor=None):
     close_conn = False
     if cursor is None:
-        conn = sqlite3.connect('database')
+        conn = sqlite3.connect(DB_NAME)
         cursor = conn.cursor()
         close_conn = True
 
-    cursor.execute("SELECT count1, count2, count3, count4, count5, count6, count7, count8 FROM counter")
+    cursor.execute(f"""
+        SELECT count1, count2, count3, count4, count5, count6, count7, count8
+        FROM {TABLE_NAME} WHERE id = 1
+    """)
     counts = list(cursor.fetchone())
 
     if close_conn:
@@ -99,11 +106,13 @@ def reset():
     if password != "Lori2025":
         return jsonify({"success": False, "message": "Invalid password."})
 
-    with sqlite3.connect("database") as conn:
+    with sqlite3.connect(DB_NAME) as conn:
         c = conn.cursor()
-        c.execute("""
-            UPDATE stats SET counter = 0, count1 = 0, count2 = 0, count3 = 0,
-            count4 = 0, count5 = 0, count6 = 0, count7 = 0, count8 = 0 WHERE id = 1
+        c.execute(f"""
+            UPDATE {TABLE_NAME}
+            SET counter = 0, count1 = 0, count2 = 0, count3 = 0,
+                count4 = 0, count5 = 0, count6 = 0, count7 = 0, count8 = 0
+            WHERE id = 1
         """)
         conn.commit()
 
