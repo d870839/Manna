@@ -144,15 +144,10 @@
                     const fillPercent = Math.min((counter / goal) * 100, 100);
                     document.getElementById('fill').style.height = fillPercent + '%';
 
-                    switch (amount) {
-                        case 4000: count1++; document.getElementById('count1').textContent = count1; break;
-                        case 2400: count2++; document.getElementById('count2').textContent = count2; break;
-                        case 1200: count3++; document.getElementById('count3').textContent = count3; break;
-                        case 600:  count4++; document.getElementById('count4').textContent = count4; break;
-                        case 5000: count5++; document.getElementById('count5').textContent = count5; break;
-                        case 1000: count6++; document.getElementById('count6').textContent = count6; break;
-                        case 500:  count7++; document.getElementById('count7').textContent = count7; break;
-                        case 250:  count8++; document.getElementById('count8').textContent = count8; break;
+                    const counts = data.counts;
+                    [count1, count2, count3, count4, count5, count6, count7, count8] = counts;
+                    for (let i = 0; i < counts.length; i++) {
+                        document.getElementById(`count${i + 1}`).textContent = counts[i];
                     }
 
                     if (data.goal_reached) {
@@ -164,7 +159,10 @@
                 });
         }
 
-        window.onload = fetchData;
+        window.onload = () => {
+            fetchData();
+            setInterval(fetchData, 10000); // Auto-refresh every 10 seconds
+        };
     </script>
 </body>
 </html>
