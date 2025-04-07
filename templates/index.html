@@ -173,6 +173,36 @@ window.onload = () => {
     fetchData();  // Call fetchData to get the initial values when the page loads
     setInterval(fetchData, 10000);  // Auto-refresh every 10 seconds
 };
+         document.getElementById("reset-form").addEventListener("submit", function (event) {
+        event.preventDefault(); // Prevent the form from submitting normally
+
+        const password = document.getElementById("reset-password").value;
+
+        fetch('/reset', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `password=${password}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            const message = document.getElementById("reset-message");
+            if (data.success) {
+                message.textContent = "Database has been reset!";
+                message.style.color = "green";
+            } else {
+                message.textContent = `Error: ${data.message}`;
+                message.style.color = "red";
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            const message = document.getElementById("reset-message");
+            message.textContent = "There was an error with the reset.";
+            message.style.color = "red";
+        });
+    });
     </script>
 </body>
 </html>
