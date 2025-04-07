@@ -4,12 +4,12 @@ import sqlite3
 app = Flask(__name__)
 
 def init_db():
-    with sqlite3.connect("counter.db") as conn:
+    with sqlite3.connect("databse.db") as conn:
         c = conn.cursor()
         c.execute('''
-            CREATE TABLE IF NOT EXISTS stats (
+            CREATE TABLE IF NOT EXISTS counter (
                 id INTEGER PRIMARY KEY,
-                counter INTEGER,
+                total INTEGER,
                 goal INTEGER,
                 count1 INTEGER,
                 count2 INTEGER,
@@ -21,9 +21,9 @@ def init_db():
                 count8 INTEGER
             )
         ''')
-        c.execute('SELECT COUNT(*) FROM stats')
+        c.execute('SELECT COUNT(*) FROM counter')
         if c.fetchone()[0] == 0:
-            c.execute('INSERT INTO stats VALUES (1, 0, 100000, 0, 0, 0, 0, 0, 0, 0, 0)')
+            c.execute('INSERT INTO counter VALUES (1, 0, 100000, 0, 0, 0, 0, 0, 0, 0, 0)')
         conn.commit()
 
 @app.route('/')
@@ -34,7 +34,7 @@ def index():
 def update():
     amount = int(request.args.get('amount', 0))
 
-    conn = sqlite3.connect('database.db')
+    conn = sqlite3.connect('database')
     cursor = conn.cursor()
 
     # Get current total and goal
@@ -79,7 +79,7 @@ def update():
 def get_counts(cursor=None):
     close_conn = False
     if cursor is None:
-        conn = sqlite3.connect('database.db')
+        conn = sqlite3.connect('database')
         cursor = conn.cursor()
         close_conn = True
 
@@ -99,7 +99,7 @@ def reset():
     if password != "Lori2025":
         return jsonify({"success": False, "message": "Invalid password."})
 
-    with sqlite3.connect("counter.db") as conn:
+    with sqlite3.connect("database") as conn:
         c = conn.cursor()
         c.execute("""
             UPDATE stats SET counter = 0, count1 = 0, count2 = 0, count3 = 0,
