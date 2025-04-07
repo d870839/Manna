@@ -100,69 +100,73 @@
         </div>
     </div>
 
-    <script>
-        let counter = 0;
-        let count1 = 0, count2 = 0, count3 = 0, count4 = 0, count5 = 0, count6 = 0, count7 = 0, count8 = 0;
+     <script>
+       let counter = 0;
+let count1 = 0, count2 = 0, count3 = 0, count4 = 0, count5 = 0, count6 = 0, count7 = 0, count8 = 0;
 
-        function fetchData() {
-            fetch('/data')
-                .then(response => response.json())
-                .then(data => {
-                    counter = data.counter;
-                    document.getElementById('counter').textContent = '$' + counter;
+function fetchData() {
+    fetch('/data')  // Fetch the data from the /data route
+        .then(response => response.json())
+        .then(data => {
+            // Set the counter and goal values from the fetched data
+            counter = data.counter;
+            document.getElementById('counter').textContent = '$' + counter;
 
-                    const goalValue = data.goal;
-                    document.getElementById('goal').textContent = goalValue;
+            const goalValue = data.goal;
+            document.getElementById('goal').textContent = goalValue;
 
-                    const fillPercent = Math.min((counter / goalValue) * 100, 100);
-                    document.getElementById('fill').style.height = fillPercent + '%';
+            // Set the fill percentage for the thermometer
+            const fillPercent = Math.min((counter / goalValue) * 100, 100);
+            document.getElementById('fill').style.height = fillPercent + '%';
 
-                    const counts = data.counts;
-                    [count1, count2, count3, count4, count5, count6, count7, count8] = counts;
-                    for (let i = 0; i < counts.length; i++) {
-                        document.getElementById(`count${i + 1}`).textContent = counts[i];
-                    }
+            // Update the counts for each button
+            const counts = data.counts;
+            [count1, count2, count3, count4, count5, count6, count7, count8] = counts;
+            for (let i = 0; i < counts.length; i++) {
+                document.getElementById(`count${i + 1}`).textContent = counts[i];
+            }
 
-                    if (counter >= goalValue) {
-                        document.getElementById('goal-message').textContent = "🎉 Goal Reached! 🎉";
-                        for (let i = 1; i <= 8; i++) {
-                            document.getElementById(`btn${i}`).disabled = true;
-                        }
-                    }
-                });
-        }
+            // Disable buttons if the goal is reached
+            if (counter >= goalValue) {
+                document.getElementById('goal-message').textContent = "🎉 Goal Reached! 🎉";
+                for (let i = 1; i <= 8; i++) {
+                    document.getElementById(`btn${i}`).disabled = true;
+                }
+            }
+        });
+}
 
-        function updateCounter(amount) {
-            const goal = parseInt(document.getElementById('goal').textContent);
-            if (counter >= goal) return;
+function updateCounter(amount) {
+    const goal = parseInt(document.getElementById('goal').textContent);
+    if (counter >= goal) return;
 
-            fetch(`/update?amount=${amount}`)
-                .then(response => response.json())
-                .then(data => {
-                    counter = data.counter;
-                    document.getElementById('counter').textContent = '$' + counter;
-                    const fillPercent = Math.min((counter / goal) * 100, 100);
-                    document.getElementById('fill').style.height = fillPercent + '%';
+    fetch(`/update?amount=${amount}`)
+        .then(response => response.json())
+        .then(data => {
+            counter = data.counter;
+            document.getElementById('counter').textContent = '$' + counter;
+            const fillPercent = Math.min((counter / goal) * 100, 100);
+            document.getElementById('fill').style.height = fillPercent + '%';
 
-                    const counts = data.counts;
-                    [count1, count2, count3, count4, count5, count6, count7, count8] = counts;
-                    for (let i = 0; i < counts.length; i++) {
-                        document.getElementById(`count${i + 1}`).textContent = counts[i];
-                    }
+            const counts = data.counts;
+            [count1, count2, count3, count4, count5, count6, count7, count8] = counts;
+            for (let i = 0; i < counts.length; i++) {
+                document.getElementById(`count${i + 1}`).textContent = counts[i];
+            }
 
-                    if (data.goal_reached) {
-                        document.getElementById('goal-message').textContent = "🎉 Goal Reached! 🎉";
-                        for (let i = 1; i <= 8; i++) {
-                            document.getElementById(`btn${i}`).disabled = true;
-                        }
-                    }
-                });
-        }
+            if (data.goal_reached) {
+                document.getElementById('goal-message').textContent = "🎉 Goal Reached! 🎉";
+                for (let i = 1; i <= 8; i++) {
+                    document.getElementById(`btn${i}`).disabled = true;
+                }
+            }
+        });
+}
 
-        window.onload = () => {
-            fetchData();
-            setInterval(fetchData, 10000); // Auto-refresh every 10 seconds
-        };
+window.onload = () => {
+    fetchData();  // Call fetchData to get the initial values when the page loads
+    setInterval(fetchData, 10000);  // Auto-refresh every 10 seconds
+};
     </script>
 </body>
 </html>
