@@ -6,6 +6,6 @@ services:
     buildCommand: "pip install -r requirements.txt"
     startCommand: "python init_db.py && python app.py"
     envVars:
-      - key: DATABASE_URL
-        value: sqlite:///database.db
+      - key: DATABASE_PATH
+        value: counter.db
 
