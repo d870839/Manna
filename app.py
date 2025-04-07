@@ -4,7 +4,7 @@ import sqlite3
 app = Flask(__name__)
 
 def init_db():
-    with sqlite3.connect("counter.db") as conn:
+    with sqlite3.connect("database.db") as conn:
         c = conn.cursor()
         c.execute('''
             CREATE TABLE IF NOT EXISTS stats (
