@@ -1,3 +1,24 @@
+@app.route('/data')
+def get_data():
+    conn = sqlite3.connect('counter.db')
+    cursor = conn.cursor()
+
+    # Get current counter value and goal
+    cursor.execute("SELECT total, goal FROM counter WHERE id = 1")
+    total, goal = cursor.fetchone()
+
+    # Get current counts from the button_counts table
+    counts = get_counts(cursor)
+
+    conn.close()
+
+    # Return the data as JSON
+    return jsonify({
+        "counter": total,
+        "goal": goal,
+        "counts": counts
+    })
+
 def update():
     amount = int(request.args.get('amount', 0))
 
