@@ -78,3 +78,28 @@ def get_counts(cursor=None):
         conn.close()
 
     return counts
+
+@app.route('/reset', methods=['POST'])
+def reset():
+    password = request.form.get('password')
+
+    # Check if the password is correct
+    if password != "YourPasswordHere":
+        return jsonify({"success": False, "message": "Invalid password."})
+
+    # Reset the counter and button counts
+    try:
+        conn = sqlite3.connect('counter.db')
+        cursor = conn.cursor()
+
+        # Reset counter and button counts in the respective tables
+        cursor.execute('UPDATE counter SET value = 0, goal = 100000 WHERE id = 1')
+        cursor.execute('UPDATE button_counts SET count = 0')
+
+        conn.commit()
+        conn.close()
+
+        return jsonify({"success": True, "message": "Database values have been reset."})
+
+    except Exception as e:
+        return jsonify({"success": False, "message": f"Error resetting database: {str(e)}"})
