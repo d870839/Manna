@@ -1,10 +1,10 @@
 import sqlite3
 import os
 
-db_path = db_path = '/opt/render/project/src/database.db'
-log_path = 'init_db_log.txt'
+db_path = '/opt/render/project/name/database.db'  # Use persistent path
+log_path = '/opt/render/project/name/init_db_log.txt'  # Log path for debugging
 
-# Open log file
+# Create/open the log file
 with open(log_path, 'w') as log_file:
     log_file.write("Database initialization started\n")
 
@@ -12,7 +12,7 @@ try:
     conn = sqlite3.connect(db_path)
     c = conn.cursor()
 
-    # Create counter table
+    # Create the 'counter' table if it doesn't exist
     c.execute('''
     CREATE TABLE IF NOT EXISTS counter (
         id INTEGER PRIMARY KEY,
@@ -27,7 +27,7 @@ try:
     if count == 0:
         c.execute('INSERT INTO counter (value, goal) VALUES (0, 100000)')
 
-    # Create button counts table
+    # Create 'button_counts' table if it doesn't exist
     c.execute('''
     CREATE TABLE IF NOT EXISTS button_counts (
         id INTEGER PRIMARY KEY,
@@ -42,8 +42,11 @@ try:
     conn.commit()
     conn.close()
 
+    # Log success message
     with open(log_path, 'a') as log_file:
         log_file.write("Database initialized successfully\n")
+
 except Exception as e:
+    # Log any errors during initialization
     with open(log_path, 'a') as log_file:
         log_file.write(f"Error during initialization: {e}\n")
