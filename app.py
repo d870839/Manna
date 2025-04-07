@@ -84,7 +84,7 @@ def reset():
     password = request.form.get('password')
 
     # Check if the password is correct
-    if password != "YourPasswordHere":
+    if password != "Lori2025":
         return jsonify({"success": False, "message": "Invalid password."})
 
     # Reset the counter and button counts
